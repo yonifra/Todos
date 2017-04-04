@@ -14,6 +14,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.cryptocodes.todos.data.DatabaseHelper;
+import com.cryptocodes.todos.data.TodosContract;
+
 public class TodoListActivity extends AppCompatActivity {
 
     String[] itemname ={
@@ -27,12 +30,16 @@ public class TodoListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        DatabaseHelper helper = new DatabaseHelper(this);
+        SQLiteDatabase db = helper.getReadableDatabase();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final ListView lv=(ListView) findViewById(R.id.lvTodos);
 //adds the custom layout
-        lv.setAdapter(new ArrayAdapter<String>(this, R.layout.todo_list_item,
-                R.id.tvNote,itemname));
+        lv.setAdapter(new ArrayAdapter<>(this, R.layout.todo_list_item,
+                R.id.tvNote, itemname));
 //adds the click event to the listView, reading the content
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
@@ -52,5 +59,21 @@ public class TodoListActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+    }
+
+    private void CreateTodo() {
+        DatabaseHelper helper = new DatabaseHelper(this);
+        SQLiteDatabase db = helper.getWritableDatabase();
+
+        // Adding a dummy to-do to the DB
+        String query = "INSERT INTO todos ("
+                + TodosContract.TodosEntry.COLUMN_TEXT + ", "
+                + TodosContract.TodosEntry.COLUMN_CATEGORY + ", "
+                + TodosContract.TodosEntry.COLUMN_CREATED + ", "
+                + TodosContract.TodosEntry.COLUMN_EXPIRED + ", "
+                + TodosContract.TodosEntry.COLUMN_DONE +")"
+                + " VALUES (\"Go to the gym\", 1, \"2016-01-01\", \"\", 0)";
+
+        db.execSQL(query);
     }
 }
